@@ -1,0 +1,70 @@
+@charset "UTF-8";
+//------------------
+//base scss
+@import "./core/_setting";
+@import "./core/_css3";
+@import "./core/_mixin";
+
+
+@include font-face('videoplayer','../font/videoplayer');
+.yvphicon{position: relative;top: 1px;display: inline-block;font-family: 'videoplayer';font-style: normal;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;color: #fff;}
+.yvphicon-play:before{content: "\0021";}
+
+//image icon
+.yvp_icon{background: url('../images/videoplayericon.png') 0 0;background-size: pte(100,16) pte(100,16);}
+
+
+//define
+.photo_figure_layer{line-height: 1.5em;position:relative;@include user-select(none);color: #eee;background-color: #000;font-family: sans-serif;font-size: 16px;margin:0;
+  a{
+  background:transparent;
+  
+  &:active,
+  &:hover{
+    outline:0;
+  }
+  
+  text-decoration:none;
+  @if length($linkColor)>1{
+    color:nth($linkColor,1);
+    &:hover{
+      color:nth($linkColor,2);
+    }
+  }@else{
+    color:$linkColor;
+    &:hover{
+      color:darken($linkColor,10%);
+    }
+  }
+}
+// ul ol dl
+ul,ol,li,dl,dd{
+  margin: 0;
+  padding:0;
+}
+ul,ol{
+  list-style: none outside none;
+}
+}
+
+.photo_figure_layer{background:#fff;position: absolute;top:10px;left:10px;width:920px;}
+.photo_figure_box{background:#fff;box-shadow:0 0 pte(5,16) rgba(0,0,0,.4);padding:pte(20,16) pte(40,16);}
+.photo_figure_showwarp{position:relative;width:100%;height:680px; 
+  .btn{display: block;width: 41px;height: 67px;@include bgcolor-alpha(rgba(255,255,255,.8));position: absolute;top: 50%;margin-top: -33px;}
+  .btn_left{left: 0;}
+  .btn_right{right: 0;}
+}
+.photo_figure_iwarp{width: 100%;height: 100%;position: relative; overflow: hidden;border: 1px solid #ededed;background: #f7f7f7;}
+.photo_gallary{height: 111px;width: 100%;margin-top: 4px;
+  .pf_iw{height: 100%;overflow: hidden;}
+  .galllist{height: 100%;width: 300%;}
+  .item{float: left;padding-top: 6px;margin-right: 10px;}
+  .imgb{display: block;width: 131px;height: 105px;position: relative;background: #343434;}
+  .img_warp{width: 100%;height: 100%;overflow: hidden;}
+  .imgchose{display: none;
+    .arrow{@include triangle(top,5px,#9fc55c); position:absolute; top:-8px;left:50%;margin-left: -2px;}
+  }
+  .item_hover{
+    .imgchose{display: block;border:3px solid #9fc55c; position: absolute;top: 0;left: 0;width:127px;height: 99px;}
+  }
+}
