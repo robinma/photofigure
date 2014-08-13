@@ -4,12 +4,10 @@
 @import "./core/_setting";
 @import "./core/_css3";
 @import "./core/_mixin";
-//image icon
-.pficon{background: url(../images/photofigure_icon.png) no-repeat;display: block;}
-
-
 //define
 .photo_figure_layer{line-height: 1.5em;position:relative;@include user-select(none);color: #eee;background-color: #000;font-family: sans-serif;font-size: 16px;margin:0;
+  //image icon
+  .pficon{background: url(../images/photofigure_icon.png) no-repeat;display: block;}
   a{
   background:transparent;
   
@@ -58,17 +56,38 @@ ul,ol{
   .btn_left{left: 5px;}
   .btn_right{right: 5px;}
 }
+.photo_figure_zr{position: absolute;width: 100%;height: 43px;@include linear-gradient(rgba(237,237,237,0.6),rgba(237,237,237,0.6));bottom: 0;left: 0;text-align: right;
+  .photo_opbtn{display: inline-block;width: 43px;height: 43px; @include opacity(80);overflow: hidden;position: relative;float: right;
+    &:hover{@include opacity(100);}
+    em{display: inline-block;width: 24px;height: 24px;position: absolute;top: 10px;left: 10px;}
+    .zoom{background-position: -42px -53px;}
+    .rotate{background-position: -71px -53px;}
+  }
+}
+
 .photo_figure_iwarp{width: 100%;height: 100%;position: relative; overflow: hidden;border: 1px solid #ededed;background: #f7f7f7;text-align: center;}
-.photo_gallary{height: 111px;width: 100%;margin-top: 4px;
+.photo_gallary{height: 111px;width: 100%;margin-top: 4px;position: relative;
   .pf_iw{height: 100%;overflow: hidden;}
   .galllist{height: 100%;width: 300%;}
   .item{float: left;padding-top: 6px;margin-right: 10px;}
-  .imgb{display: block;width: 131px;height: 105px;position: relative;background: #343434;}
-  .img_warp{width: 100%;height: 100%;overflow: hidden;}
+  .imgb{display: block;width: 131px;height: 105px;position: relative;background: #dedede;}
+  .img_warp{width: 100%;height: 100%;overflow: hidden;position:relative;}
   .imgchose{display: none;
     .arrow{@include triangle(top,5px,#9fc55c); position:absolute; top:-8px;left:50%;margin-left: -2px;}
   }
+  .load{display: block;width: 20px;height: 20px;background:#fff url(../images/load.gif) no-repeat center; border-radius: 3px;border:1px solid #cacaca;position: absolute;top: 50%;left: 50%;margin: -10px 0 0 -10px;}
   .item_hover{
     .imgchose{display: block;border:3px solid #9fc55c; position: absolute;top: 0;left: 0;width:127px;height: 99px;}
   }
+  .gall_btn{display: block;width: 28px; height: 111px;position: absolute;top: 0;
+    .btn{display: block;width: 100%;height: 100%;position: relative;@include opacity(80);
+      &:hover{@include opacity(100);}
+    }
+    em{display: block;width:13px;height: 21px;position: absolute;top: 50%;left: 50%;margin: -12px 0 0 -5px;}
+    .l{background-position:0 -53px;}
+    .r{background-position:-19px -53px;}
+  }
+  .gall_btn_l{left: -28px;}
+  .gall_btn_r{right: -28px;}
+
 }

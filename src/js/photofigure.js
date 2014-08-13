@@ -13,7 +13,7 @@
 		root.photofigure = factory(root, $);
 	}
 })(window, $, function(root, $) {
-	var $win = $(window);
+	var $win = $(window),$html = $('html'),$body=$('body');	
 	//pubsub events
 	var pubsub = {
 		_handlers: '',
@@ -38,8 +38,7 @@
 			return this;
 		}
 	}
-
-	var $html = $('html');
+	//figure class
 	var Figure = function(imgdata) {
 		var imgData = [];
 		if ($.isArray(imgdata)) {
@@ -55,7 +54,7 @@
 	$.extend(Figure.prototype, pubsub, {
 		init: function() {
 			this._renderWarp()
-		},
+		}
 
 	});
 	//render photo figure warp
@@ -70,6 +69,7 @@
 								<div class="photo_figure_box"></div>\
 							</div>\
 					</div>';
+			this._setHidden();
 			var $warp = $(html);
 			$html.append($warp);
 			this.$_warp = $warp;
@@ -77,11 +77,18 @@
 			this._warpControl();
 			//show photo main warp
 			this._renderPhotoShow();
-			this._renderGallary()
+			this._renderGallary();
+		},
+		_setHidden:function(){
+			$body.css({'overflow':'hidden'});
+		},
+		_setVisible:function(){
+			$body.css({'overflow':'visible'});
 		},
 		_warpControl: function() {
 			var __ = this;
 			this.$_warp.on('click', 'a.closebtn', function() {
+				__._setVisible();
 				__.$_warp.hide();
 			});
 		}
@@ -89,6 +96,7 @@
 	//photoshow
 	$.extend(Figure.prototype, {
 		$_photoshow: '',
+		_mainImg:'',
 		_renderPhotoShow: function() {
 			var html = '<div class="photo_figure_showwarp">\
 						<div class="photo_figure_iwarp" node-type="img-home"></div>\
@@ -96,7 +104,14 @@
 							<em class="pficon arr_l"></em>\
 						</a>\
 						<a href="javascript:;" class="btn btn_right"><em class="pficon arr_r"></em></a>\
+						<div class="photo_figure_zr">\
+							<a href="javascript:;" class="photo_opbtn" node-type="rotate"><em class="pficon rotate"></em></a>\
+							<a href="javascript:;" class="photo_opbtn" node-type="zoom">\
+								<em class="pficon zoom"></em>\
+							</a>\
+						</div>\
 					</div>';
+			this._setHidden()
 			var photoshow = $(html);
 			this.$_photoshow = photoshow;
 			this.$_figbox.append(photoshow);
@@ -108,27 +123,38 @@
 				__.imgListObj.pre();
 			}).on('click', 'a.btn_right', function() {
 				__.imgListObj.next();
+			}).on('click','a[node-type="rotate"]',function(){
+				__._mainImg && __._mainImg.rotate.clockwise();
 			});
 		},
 		_showMainImage: function(data) {
-			new mainImages(data, this);
+			this._mainImg = new mainImages(data, this);
 		}
 	});
 	//image list bow
 	$.extend(Figure.prototype, {
 		$_gallary: '',
+		$_viewwarp:'',
+		$ul:'',
 		imgListObj: '',
 		_imglist: [],
 		_renderGallary: function() {
 			var html = '<div class="photo_gallary">\
-						<div class="pf_iw">\
+						<div class="pf_iw" node-type="imgview_warp">\
 							<ul class="galllist clearfix"></ul>\
+						</div>\
+						<div class="gall_btn gall_btn_l">\
+							<a href="javascript:;" class="btn" node-type="btn-l"><em class="pficon l"></em></a>\
+						</div>\
+						<div class="gall_btn gall_btn_r">\
+							<a href="javascript:;" class="btn" node-type="btn-r"><em class="pficon r"></em></a>\
 						</div>\
 					</div>';
 			var gallary = $(html);
 			this.$_gallary = gallary;
+			this.$_viewwarp = gallary.find('div[node-type="imgview_warp"]');
+			this.$ul = gallary.find('ul');
 			this.$_figbox.append(gallary);
-
 			this._gallaryControl()
 		},
 		_gallaryControl: function() {
@@ -145,15 +171,23 @@
 
 				__._imglist.push(minimg);
 				minimg.on('click', function(minimg) {
-					__._gallary_emititem(minimg)
+					__.imgListObj.setCurrent(minimg.data.cindex)
+				
 				});
 
 			}).on('pre', function(index) {
 				__._gallary_setFocus(index)
 			}).on('next', function(index) {
 				__._gallary_setFocus(index)
+			}).on('current',function(index){
+				__._gallary_setFocus(index)
 			});
 
+			this.$_gallary.on('click','a[node-type="btn-l"]',function(){
+				__.imgListObj.pre();
+			}).on('click','a[node-type="btn-r"]',function(){
+				__.imgListObj.next()
+			})
 			this.imgListObj.add(this.imgData);
 			this._gallary_setFocus(this.imgListObj.currIndex)
 		},
@@ -168,6 +202,21 @@
 			imgobjs[index].setCurrent();
 			//show images
 			this._showMainImage(imgobjs[index].data);
+			this._slideImgView(index)
+		},
+		_slideImgView:function(inx){
+			var viewWid = 131;
+			var pagesize=Math.floor(this.$_viewwarp.width()/viewWid);
+			var len = this._imglist.length;
+			if(len<pagesize) return;
+			var page = Math.floor(inx/pagesize);
+			var s= page*pagesize,e=(page+1)*pagesize;
+			if(e>len){
+				e=len;
+				s=s-e+len;
+			}
+			this.$ul.animate({'margin-left':-(s*(viewWid+10))},200);
+
 		}
 
 
@@ -224,6 +273,10 @@
 			}
 			this.emit('next', this.currIndex);
 
+		},
+		setCurrent:function(index){
+			this.currIndex = index;
+			this.emit('current',this.currIndex)
 		}
 	});
 
@@ -238,8 +291,7 @@
 			var __ = this;
 			var html = '<li class="item">\
 						<a href="javascript:;" class="imgb">\
-							<div class="img_warp">\
-							</div>\
+							<div class="img_warp"><span class="load"></span></div>\
 							<div class="imgchose">\
 								<em class="arrow"></em>\
 							</div>\
@@ -353,12 +405,15 @@
 						wwid: __.boxwh.width,
 						whei: __.boxwh.height
 					});
-
-					//__.rotate.clockwise()
-					//this.rotate.anticlockwise()
 				}, 300)
 
 			});
+
+		},
+		zoomIn:function(){
+
+		},
+		zoomOut:function(){
 
 		}
 	})
