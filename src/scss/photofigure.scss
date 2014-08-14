@@ -43,7 +43,8 @@ ul,ol{
 .photo_bg_layer{width: 100%;height: 100%;position: absolute;top: 0;left: 0;@include bgcolor-alpha(rgba(255,255,255,.8));}
 .photo_figure_main{background:#fff;width:920px;margin: 0 auto;position: relative;
   .closebtn{display:block;width: 46px;height: 46px;position: absolute;right: -18px;top: -18px;
-    em{display: block;background-position: 0 0;width: 100%;height: 100%;}
+    em{display: block;background-position: 0 0;width: 100%;height: 100%;border-radius: 100%; }
+    &:hover em{box-shadow: 0 0 5px rgba(0,0,0,.5);}
   }
 }
 .photo_figure_box{background:#fff;box-shadow:0 0 pte(5,16) rgba(0,0,0,.4);padding:pte(20,16) pte(40,16);}

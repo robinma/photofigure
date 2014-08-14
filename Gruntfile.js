@@ -11,34 +11,37 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         concat: {
             videoplayer:{
-                src:[
+                src:['src/js/photofigure.js',
+                'src/js/preOnloadImgSize.js',
+                'src/js/resetImgSize.js',
+                'src/js/rotate.js'
                 ],
-                dest:''
+                dest:'build/photofigure.js'
             }
         },
-        // uglify: {
-        //     videoplayer:{
-        //         src:[''],
-        //         dest:'',
-        //         banner:''
-        //     }
-        // },
-        // cssmin: {
-        //     build: {
-        //         src  : [''],
-        //         dest : ''
-        //     }
-        // },
-        // copy: {
-        //     build: {
-        //         expand  : true,
-        //         cwd     : 'src/',
-        //         src     : ['*/*.*','!js/*.*','!scss/*.*','!css/*.*'],
-        //         dest    : 'build/',
-        //        // flatten : true,
-        //        filter  : 'isFile'
-        //     }
-        // },
+        uglify: {
+            videoplayer:{
+                src:['build/photofigure.js'],
+                dest:'build/photofigure.min.js',
+                banner:''
+            }
+        },
+        cssmin: {
+            build: {
+                src  : ['src/css/photofigure.css'],
+                dest : 'build/css/photofigure.min.css'
+            }
+        },
+        copy: {
+            build: {
+                expand  : true,
+                cwd     : 'src/',
+                src     : ['*/*.*','!js/*.*','!scss/*.*','!css/*.*'],
+                dest    : 'build/',
+               // flatten : true,
+               filter  : 'isFile'
+            }
+        },
         sass:{
             dist:{
                 values:'compressed',
@@ -64,8 +67,10 @@ module.exports = function(grunt) {
     });
 
 
-    // grunt.registerTask('default', ['concat', 'uglify', 'cssmin', 'copy']);
+    grunt.registerTask('default', ['concat', 'uglify', 'cssmin', 'copy']);
     grunt.registerTask('watchfile', ['watch']);
+
+
 
 
 };
