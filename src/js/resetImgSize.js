@@ -11,7 +11,11 @@
 	 * param.zoom {bool} if images size than param.width latter,is or not reset size
 	 */
 	var init=function(param,fn){
-		todo(param,fn);
+		var defalts={};
+		$.extend(defalts,{
+			zoom:true
+		},param)
+		todo(defalts,fn);
 	};
 	var todo=function(p,cb){
 		getJs('../src/js/preOnloadImgSize.js','preOnloadImgSize',function(loadimg){
@@ -66,7 +70,12 @@
 		var nw,nh;
 		var ratio=p.width/p.height;
 		var lratio=iw/ih;
-		
+
+		if(!p.zoom){
+			if(iw<=p.width && ih <= p.height){
+				return [iw,ih];	
+			}
+		}
 		if(ratio>lratio){
 			nw=p.width;
 			nh=nw/lratio;

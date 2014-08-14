@@ -5,7 +5,7 @@
 @import "./core/_css3";
 @import "./core/_mixin";
 //define
-.photo_figure_layer{line-height: 1.5em;position:relative;@include user-select(none);color: #eee;background-color: #000;font-family: sans-serif;font-size: 16px;margin:0;
+.photo_figure_layer{line-height: 1.5em;position:relative;@include user-select(none);color: #eee;font-family: sans-serif;font-size: 16px;margin:0;
   //image icon
   .pficon{background: url(../images/photofigure_icon.png) no-repeat;display: block;}
   a{
@@ -39,8 +39,8 @@ ul,ol{
 }
 }
 
-.photo_figure_layer{font-size: 16px;outline: none;width: 100%;height: 100%;overflow: hidden;position: absolute;top: 0;left: 0;padding-top: 20px;}
-.photo_bg_layer{width: 100%;height: 100%;position: absolute;top: 0;left: 0;@include bgcolor-alpha(rgba(255,255,255,.8));}
+.photo_figure_layer{font-size: 16px;outline: none;width: 100%;height: 100%;overflow: hidden;position: fixed;top: 0;left: 0;padding-top: 20px;z-index: 5000;}
+.photo_bg_layer{width: 100%;height: 100%;position: absolute;top: 0;left: 0;@include bgcolor-alpha(rgba(0,0,0,0.5));}
 .photo_figure_main{background:#fff;width:920px;margin: 0 auto;position: relative;
   .closebtn{display:block;width: 46px;height: 46px;position: absolute;right: -18px;top: -18px;
     em{display: block;background-position: 0 0;width: 100%;height: 100%;border-radius: 100%; }
@@ -56,8 +56,12 @@ ul,ol{
   }
   .btn_left{left: 5px;}
   .btn_right{right: 5px;}
+  .pfmap{display: block;width: 130px; height: 104px;@include bgcolor-alpha(rgba(0,0,0,.7));position: absolute; bottom: 50px;right:20px; border: 1px solid #7d6c6d;display: none;overflow: hidden;
+    .mapImg{@include opacity(70);position: absolute;}
+    .viewarea{cursor: move;display: block;border: 3px solid #b9d199;position: absolute;background: url(about:blank);}
+  }
 }
-.photo_figure_zr{position: absolute;width: 100%;height: 43px;@include linear-gradient(rgba(237,237,237,0.6),rgba(237,237,237,0.6));bottom: 0;left: 0;text-align: right;
+.photo_figure_zr{position: absolute;width: 100%;height: 43px;@include linear-gradient(rgba(237,237,237,0.6),rgba(237,237,237,0.6));bottom: -1px;left: 0;text-align: right;
   .photo_opbtn{display: inline-block;width: 43px;height: 43px; @include opacity(80);overflow: hidden;position: relative;float: right;
     &:hover{@include opacity(100);}
     em{display: inline-block;width: 24px;height: 24px;position: absolute;top: 10px;left: 10px;}
@@ -66,7 +70,9 @@ ul,ol{
   }
 }
 
-.photo_figure_iwarp{width: 100%;height: 100%;position: relative; overflow: hidden;border: 1px solid #ededed;background: #f7f7f7;text-align: center;}
+.photo_figure_iwarp{height: 100%;position: relative; overflow: hidden;border: 1px solid #ededed;background: #f7f7f7;text-align: center;
+  .bigPhotoImg{position: absolute;}
+}
 .photo_gallary{height: 111px;width: 100%;margin-top: 4px;position: relative;
   .pf_iw{height: 100%;overflow: hidden;}
   .galllist{height: 100%;width: 300%;}
@@ -74,7 +80,7 @@ ul,ol{
   .imgb{display: block;width: 131px;height: 105px;position: relative;background: #dedede;}
   .img_warp{width: 100%;height: 100%;overflow: hidden;position:relative;}
   .imgchose{display: none;
-    .arrow{@include triangle(top,5px,#9fc55c); position:absolute; top:-8px;left:50%;margin-left: -2px;}
+    .pf_arrow{@include triangle(top,5px,#9fc55c); position:absolute; top:-8px;left:50%;margin-left: -2px;}
   }
   .load{display: block;width: 20px;height: 20px;background:#fff url(../images/load.gif) no-repeat center; border-radius: 3px;border:1px solid #cacaca;position: absolute;top: 50%;left: 50%;margin: -10px 0 0 -10px;}
   .item_hover{

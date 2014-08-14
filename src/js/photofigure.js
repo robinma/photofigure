@@ -13,7 +13,8 @@
 		root.photofigure = factory(root, $);
 	}
 })(window, $, function(root, $) {
-	var $win = $(window),$html = $('html'),$body=$('body');	
+	var isIe6=(!!window.ActiveXObject&&!window.XMLHttpRequest);
+	var $win = $(window),$html = $('html'),$body=$('body'),winAttr={};	
 	//pubsub events
 	var pubsub = {
 		_handlers: '',
@@ -49,7 +50,8 @@
 		init: function(imgdata) {
 			var data=this.filterData(imgdata);
 			this.imgData= this.imgData.concat(data);
-			this._renderWarp()
+			this.getWinWH();
+			this._renderWarp();
 		},
 		filterData:function(imgdata){
 			var imgData = [];
@@ -61,7 +63,6 @@
 
 			return imgData;
 		}
-
 	});
 	//render photo figure warp
 	$.extend(Figure.prototype, {
@@ -77,8 +78,9 @@
 					</div>';
 			this._setHidden();
 			var $warp = $(html);
-			$html.append($warp);
 			this.$_warp = $warp;
+			this._setPosition()
+			$html.append($warp);
 			this.$_figbox = $warp.find('.photo_figure_box')
 			this._warpControl();
 			//show photo main warp
@@ -86,18 +88,29 @@
 			this._renderGallary();
 		},
 		_setHidden:function(){
-			$body.css({'overflow':'hidden'});
+			$html.css({'overflow':'hidden'});
 		},
 		_setVisible:function(){
-			$body.css({'overflow':'visible'});
+			$html.css({'overflow':'visible'});
 		},
 		_warpControl: function() {
 			var __ = this;
 			this.$_warp.on('click', 'a.closebtn', function() {
 				__._setVisible();
 				__.$_warp.remove();
-
 			});
+		},
+		_setPosition:function(){
+			if(isIe6){
+				var st = $win.scrollTop();
+				this.$_warp.css({'position':'absolute',top:st,left:0})
+			}else{
+				this.$_warp.css({'position':'fixed','top':0,'left':0});
+			}
+		},
+		getWinWH:function(){
+			winAttr['winWidth']=$win.width();
+			winAttr['winHeight']=$win.height();
 		}
 	});
 	//photoshow
@@ -113,10 +126,12 @@
 						<a href="javascript:;" class="btn btn_right"><em class="pficon arr_r"></em></a>\
 						<div class="photo_figure_zr">\
 							<a href="javascript:;" class="photo_opbtn" node-type="rotate"><em class="pficon rotate"></em></a>\
-							<a href="javascript:;" class="photo_opbtn" node-type="zoom" style="display:none;">\
+							<a href="javascript:;" class="photo_opbtn" node-type="zoom">\
 								<em class="pficon zoom"></em>\
 							</a>\
+							<a href="" class="">查看原图</a>\
 						</div>\
+						<div class="pfmap" node-type="pf-map"></div>\
 					</div>';
 			this._setHidden()
 			var photoshow = $(html);
@@ -132,6 +147,8 @@
 				__.imgListObj.next();
 			}).on('click','a[node-type="rotate"]',function(){
 				__._mainImg && __._mainImg.rotate.clockwise();
+			}).on('click','a[node-type="zoom"]',function(){
+				__._mainImg && __._mainImg.zoomIn();
 			});
 		},
 		_showMainImage: function(data) {
@@ -202,7 +219,6 @@
 				__.imgListObj.next()
 			})
 			this.imgListObj.add(this.imgData);
-			console.log(__.currIndex)
 			__.imgListObj.setCurrent(__.currIndex || 0)
 		},
 
@@ -310,7 +326,7 @@
 						<a href="javascript:;" class="imgb">\
 							<div class="img_warp"><span class="load"></span></div>\
 							<div class="imgchose">\
-								<em class="arrow"></em>\
+								<em class="pf_arrow"></em>\
 							</div>\
 						</a>\
 					</li>';
@@ -367,11 +383,13 @@
 		this.figure = Figure;
 		this.boxwh = {};
 		this.imghome = this.figure.$_photoshow.find('div[node-type="img-home"]');
+		this.map = this.figure.$_photoshow.find('div[node-type="pf-map"]')
 		this.init();
 	};
 
 	$.extend(mainImages.prototype, pubsub, {
 		init: function() {
+			this.map.hide();
 			this.events();
 			this.renderImg()
 		},
@@ -411,9 +429,6 @@
 				img.css('margin-top', (__.boxwh.height - wh[1]) / 2);
 			}
 			getJs('../src/js/rotate.js', 'rotate', function(Rotate) {
-				// setTimeout(function() {
-					
-				// }, 300)
 				__.rotate = Rotate({
 						imgObj: img,
 						width: wh[0],
@@ -427,9 +442,108 @@
 
 		},
 		zoomIn:function(){
+			var __=this;
+			var bwh=this.boxwh;
+			var imgUrl = this.imgdata['bigImg'];
+			getJs('../src/js/resetImgSize.js', 'resetImgSize', function(resize) {
+				resize({
+					imageUrl: imgUrl,
+					style: 'min',
+					width: __.boxwh.width,
+					height: __.boxwh.height,
+					zoom:false
+				}, function(wh, url) {
+					__._setBigImg(wh,url);
+				});
+			})
 
 		},
 		zoomOut:function(){
+
+		},
+		_setBigImg:function(wh,url){
+			var __=this;
+			if(wh[0]>this.boxwh.width || wh[1]>this.boxwh.height){
+				getJs('../src/js/resetImgSize.js','resetImgSize',function(resize){
+					resize({
+						imageUrl: url,
+						style: 'max',
+						width: $win.width(),
+						height: $win.height()
+					}, function(wh, url) {
+						__._insetBigImg(wh,url)
+					});
+				});
+			}else{
+				__._insetBigImg(wh,url)
+			}
+			
+			//this.setImgPos(wh, img);
+		},
+		$_bigImgWh:'',
+		_insetBigImg:function(wh,url){
+			var img = $('<img src="' + url + '"  width="' + wh[0] + '" height="' + wh[1] + '" class="bigPhotoImg" />');
+			this.imghome.html(img);
+			this.$_bigImgWh=wh;
+			if(wh[0]<=this.boxwh.width && wh[1] <=this.boxwh.height){
+				img.css('margin-top', (this.boxwh.height - wh[1]) / 2);
+			}else{
+				this._insertMapImg(wh,img,url);
+			}
+		},
+		$_mw:'',
+		$_mh:'',
+		// get map img size
+		_getMapImgSize:function(wh,url,callback){
+			var __=this;
+			__.map.show();
+			__.$_mw=__.map.width();
+			__.$_mh=__.map.height();
+			getJs('../src/js/resetImgSize.js','resetImgSize',function(resize){
+					resize({
+						imageUrl: url,
+						style: 'max',
+						width: __.$_mw,
+						height: __.$_mh
+					}, function(wh, url) {
+						callback && callback(wh,url);
+					});
+				});
+		},
+		_insertMapImg:function(wh,img,url){
+			var __=this;
+			__._setBigImgPosition(wh,img);
+			__._getMapImgSize(wh,url,function(mapwh,url){
+				var mapimg=$('<img src="' + url + '"  width="' + mapwh[0] + '" height="' + mapwh[1] + '" class="mapImg" />');
+					var l = (__.$_mw - mapwh[0])/2;
+					var t = (__.$_mh - mapwh[1])/2;
+					mapimg.css({'top':t,'left':l});
+					__.map.html(mapimg);
+
+					//set zoomview box
+					__._getViewArea(wh,mapwh);
+					__._initViewareaPos();
+			});
+		},
+		_setBigImgPosition:function(wh,img){
+			var __=this;
+			var l = (__.boxwh.width - wh[0])/2;
+			var t = (__.boxwh.height - wh[1])/2;
+			img.css({'top':t,'left':l});
+		},
+		$_viewBtn:'',
+		_getViewArea:function(wh,mapwh){
+			var ratio =mapwh[0]/wh[0];
+			var viewWH=[];
+			viewWH[0]=this.boxwh.width*ratio;
+			viewWH[1]=this.boxwh.height*ratio;
+			var viewarea = $('<p class="viewarea"></p>');
+			viewarea.width(viewWH[0]-6);
+			viewarea.height(viewWH[1]-6)
+			this.map.append(viewarea);
+			this.$_viewBtn = viewarea;
+		},
+		_initViewareaPos:function(){
 
 		}
 	})

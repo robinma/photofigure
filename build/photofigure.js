@@ -86,10 +86,10 @@
 			this._renderGallary();
 		},
 		_setHidden:function(){
-			$body.css({'overflow':'hidden'});
+			$html.css({'overflow':'hidden'});
 		},
 		_setVisible:function(){
-			$body.css({'overflow':'visible'});
+			$html.css({'overflow':'visible'});
 		},
 		_warpControl: function() {
 			var __ = this;
@@ -98,6 +98,9 @@
 				__.$_warp.remove();
 
 			});
+		},
+		_setPosition:function(){
+
 		}
 	});
 	//photoshow
@@ -202,7 +205,6 @@
 				__.imgListObj.next()
 			})
 			this.imgListObj.add(this.imgData);
-			console.log(__.currIndex)
 			__.imgListObj.setCurrent(__.currIndex || 0)
 		},
 
@@ -310,7 +312,7 @@
 						<a href="javascript:;" class="imgb">\
 							<div class="img_warp"><span class="load"></span></div>\
 							<div class="imgchose">\
-								<em class="arrow"></em>\
+								<em class="pf_arrow"></em>\
 							</div>\
 						</a>\
 					</li>';
