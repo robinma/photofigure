@@ -41,6 +41,7 @@
 	//figure class
 	var Figure = function(imgdata,currIndex) {
 		this.imgData = [];
+		this.currIndex = currIndex;
 		this.init(imgdata);
 	};
 
@@ -201,7 +202,8 @@
 				__.imgListObj.next()
 			})
 			this.imgListObj.add(this.imgData);
-			this._gallary_setFocus(this.imgListObj.currIndex)
+			console.log(__.currIndex)
+			__.imgListObj.setCurrent(__.currIndex || 0)
 		},
 
 		_gallary_emititem: function(ming) {
@@ -288,6 +290,8 @@
 
 		},
 		setCurrent:function(index){
+			if(index <0) index =0;
+			if(index > this.dataList.length - 1) index = this.dataList.length - 1;
 			this.currIndex = index;
 			this.emit('current',this.currIndex)
 		}
@@ -441,8 +445,8 @@
 		}
 	}
 
-	return function(imgDataList) {
-		return figureObj = new Figure(imgDataList);
+	return function(imgDataList,index) {
+		return figureObj = new Figure(imgDataList,index);
 	}
 
 });
