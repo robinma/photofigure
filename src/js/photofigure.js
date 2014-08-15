@@ -13,47 +13,50 @@
 		root.photofigure = factory(root, $);
 	}
 })(window, $, function(root, $) {
-	var isIe6=(!!window.ActiveXObject&&!window.XMLHttpRequest);
-	var $win = $(window),$html = $('html'),$body=$('body'),winAttr={};	
+	var isIe6 = (!!window.ActiveXObject && !window.XMLHttpRequest);
+	var $win = $(window),
+		$html = $('html'),
+		$body = $('body'),
+		winAttr = {};
 	//pubsub events
 	var pubsub = {
-		_handlers: '',
-		on: function(etype, handler) {
-			if (typeof this._handlers !== 'object') {
-				this._handlers = [];
+			_handlers: '',
+			on: function(etype, handler) {
+				if (typeof this._handlers !== 'object') {
+					this._handlers = [];
+				}
+				if (!this._handlers[etype]) {
+					this._handlers[etype] = []
+				}
+				if (typeof handler === 'function') {
+					this._handlers[etype].push(handler)
+				}
+				return this;
+			},
+			emit: function(etype) {
+				var args = Array.prototype.slice.call(arguments, 1)
+				var handlers = this._handlers[etype] || [];
+				for (var i = 0, l = handlers.length; i < l; i++) {
+					handlers[i].apply(null, args)
+				}
+				return this;
 			}
-			if (!this._handlers[etype]) {
-				this._handlers[etype] = []
-			}
-			if (typeof handler === 'function') {
-				this._handlers[etype].push(handler)
-			}
-			return this;
-		},
-		emit: function(etype) {
-			var args = Array.prototype.slice.call(arguments, 1)
-			var handlers = this._handlers[etype] || [];
-			for (var i = 0, l = handlers.length; i < l; i++) {
-				handlers[i].apply(null, args)
-			}
-			return this;
 		}
-	}
-	//figure class
-	var Figure = function(imgdata,currIndex) {
+		//figure class
+	var Figure = function(imgdata, currIndex) {
 		this.imgData = [];
-		this.currIndex = currIndex;
+		this.currIndex = currIndex | 0;
 		this.init(imgdata);
 	};
 
 	$.extend(Figure.prototype, pubsub, {
 		init: function(imgdata) {
-			var data=this.filterData(imgdata);
-			this.imgData= this.imgData.concat(data);
+			var data = this.filterData(imgdata);
+			this.imgData = this.imgData.concat(data);
 			this.getWinWH();
 			this._renderWarp();
 		},
-		filterData:function(imgdata){
+		filterData: function(imgdata) {
 			var imgData = [];
 			if ($.isArray(imgdata)) {
 				imgData = imgData.concat(imgdata);
@@ -87,11 +90,15 @@
 			this._renderPhotoShow();
 			this._renderGallary();
 		},
-		_setHidden:function(){
-			$html.css({'overflow':'hidden'});
+		_setHidden: function() {
+			$html.css({
+				'overflow': 'hidden'
+			});
 		},
-		_setVisible:function(){
-			$html.css({'overflow':'visible'});
+		_setVisible: function() {
+			$html.css({
+				'overflow': 'visible'
+			});
 		},
 		_warpControl: function() {
 			var __ = this;
@@ -100,23 +107,31 @@
 				__.$_warp.remove();
 			});
 		},
-		_setPosition:function(){
-			if(isIe6){
+		_setPosition: function() {
+			if (isIe6) {
 				var st = $win.scrollTop();
-				this.$_warp.css({'position':'absolute',top:st,left:0})
-			}else{
-				this.$_warp.css({'position':'fixed','top':0,'left':0});
+				this.$_warp.css({
+					'position': 'absolute',
+					top: st,
+					left: 0
+				})
+			} else {
+				this.$_warp.css({
+					'position': 'fixed',
+					'top': 0,
+					'left': 0
+				});
 			}
 		},
-		getWinWH:function(){
-			winAttr['winWidth']=$win.width();
-			winAttr['winHeight']=$win.height();
+		getWinWH: function() {
+			winAttr['winWidth'] = $win.width();
+			winAttr['winHeight'] = $win.height();
 		}
 	});
 	//photoshow
 	$.extend(Figure.prototype, {
 		$_photoshow: '',
-		_mainImg:'',
+		_mainImg: '',
 		_renderPhotoShow: function() {
 			var html = '<div class="photo_figure_showwarp">\
 						<div class="photo_figure_iwarp" node-type="img-home"></div>\
@@ -127,9 +142,8 @@
 						<div class="photo_figure_zr">\
 							<a href="javascript:;" class="photo_opbtn" node-type="rotate"><em class="pficon rotate"></em></a>\
 							<a href="javascript:;" class="photo_opbtn" node-type="zoom">\
-								<em class="pficon zoom"></em>\
+								<em class="pficon zoomin"></em>\
 							</a>\
-							<a href="" class="">查看原图</a>\
 						</div>\
 						<div class="pfmap" node-type="pf-map"></div>\
 					</div>';
@@ -145,23 +159,45 @@
 				__.imgListObj.pre();
 			}).on('click', 'a.btn_right', function() {
 				__.imgListObj.next();
-			}).on('click','a[node-type="rotate"]',function(){
-				__._mainImg && __._mainImg.rotate.clockwise();
-			}).on('click','a[node-type="zoom"]',function(){
-				__._mainImg && __._mainImg.zoomIn();
+			}).on('click', 'a[node-type="rotate"]', function() {
+				if(!__._mainImg)return;
+				if(__._mainImg.zoom){
+					__._mainImg.zoomOut();
+					__._setzoomstatus()
+				}
+				 __._mainImg.rotate.clockwise();
+			}).on('click', 'a[node-type="zoom"]', function() {
+				if(!__._mainImg)return;
+				var _this = $(this);
+				if(__._mainImg.zoom){
+					__._mainImg.zoomOut();
+				}else{
+					__._mainImg.zoomIn();
+				}
+				__._setzoomstatus()
+				
 			});
 		},
 		_showMainImage: function(data) {
 			this._mainImg = new mainImages(data, this);
+			this._setzoomstatus();
+		},
+		_setzoomstatus:function(){
+			var zoombtn = this.$_photoshow.find('a[node-type="zoom"]');
+			if(this._mainImg.zoom){
+				zoombtn.html('<em class="pficon zoomout"></em>');
+			}else{
+				zoombtn.html('<em class="pficon zoomin"></em>');
+			}
 		}
 	});
 	//image list bow
 	$.extend(Figure.prototype, {
 		$_gallary: '',
-		$_viewwarp:'',
-		$ul:'',
+		$_viewwarp: '',
+		$ul: '',
 		imgListObj: '',
-		_imglist: [],
+		_imglist: '',
 		_renderGallary: function() {
 			var html = '<div class="photo_gallary">\
 						<div class="pf_iw" node-type="imgview_warp">\
@@ -181,8 +217,8 @@
 			this.$_figbox.append(gallary);
 			this._gallaryControl()
 		},
-		add:function(imgdata){
-			if(this.imgListObj){
+		add: function(imgdata) {
+			if (this.imgListObj) {
 				var data = this.filterData(imgdata);
 				this.imgListObj.add(data);
 			}
@@ -192,6 +228,7 @@
 		},
 		_gallary_showimg: function() {
 			var __ = this;
+			this._imglist = [];
 			this.imgListObj = new imgList();
 
 			this.imgListObj.on('add', function(param) {
@@ -202,20 +239,20 @@
 				__._imglist.push(minimg);
 				minimg.on('click', function(minimg) {
 					__.imgListObj.setCurrent(minimg.data.cindex)
-				
+
 				});
 
 			}).on('pre', function(index) {
 				__._gallary_setFocus(index)
 			}).on('next', function(index) {
 				__._gallary_setFocus(index)
-			}).on('current',function(index){
+			}).on('current', function(index) {
 				__._gallary_setFocus(index)
 			});
 
-			this.$_gallary.on('click','a[node-type="btn-l"]',function(){
+			this.$_gallary.on('click', 'a[node-type="btn-l"]', function() {
 				__.imgListObj.pre();
-			}).on('click','a[node-type="btn-r"]',function(){
+			}).on('click', 'a[node-type="btn-r"]', function() {
 				__.imgListObj.next()
 			})
 			this.imgListObj.add(this.imgData);
@@ -234,19 +271,23 @@
 			//show images
 			this._showMainImage(imgobjs[index].data);
 			this._slideImgView(index)
+			this.emit('switch', index, imgobjs, this);
 		},
-		_slideImgView:function(inx){
+		_slideImgView: function(inx) {
 			var viewWid = 131;
-			var pagesize=Math.floor(this.$_viewwarp.width()/viewWid);
+			var pagesize = Math.floor(this.$_viewwarp.width() / viewWid);
 			var len = this._imglist.length;
-			if(len<pagesize) return;
-			var page = Math.floor(inx/pagesize);
-			var s= page*pagesize,e=(page+1)*pagesize;
-			if(e>len){
-				e=len;
-				s=s-e+len;
+			if (len < pagesize) return;
+			var page = Math.floor(inx / pagesize);
+			var s = page * pagesize,
+				e = (page + 1) * pagesize;
+			if (e > len) {
+				e = len;
+				s = s - e + len;
 			}
-			this.$ul.animate({'margin-left':-(s*(viewWid+10))},200);
+			this.$ul.animate({
+				'margin-left': -(s * (viewWid + 10))
+			}, 200);
 
 		}
 
@@ -305,11 +346,11 @@
 			this.emit('next', this.currIndex);
 
 		},
-		setCurrent:function(index){
-			if(index <0) index =0;
-			if(index > this.dataList.length - 1) index = this.dataList.length - 1;
+		setCurrent: function(index) {
+			if (index < 0) index = 0;
+			if (index > this.dataList.length - 1) index = this.dataList.length - 1;
 			this.currIndex = index;
-			this.emit('current',this.currIndex)
+			this.emit('current', this.currIndex)
 		}
 	});
 
@@ -367,12 +408,14 @@
 		setImgAttr: function(wh, url) {
 			var img = $('<img src="' + url + '"  width="' + wh[0] + '" height="' + wh[1] + '" class="bigPhotoImg" />');
 
-			if(wh[0]>wh[1]){
-				img.css('margin-left',-(wh[0]-130)/2);
-			}else{
-				img.css('margin-top',-(wh[1]-130)/2);
+			if (wh[0] > wh[1]) {
+				img.css('margin-left', -(wh[0] - 130) / 2);
+			} else {
+				img.css('margin-top', -(wh[1] - 130) / 2);
 			}
-			img.css('opacity',0).animate({'opacity':1},200);
+			img.css('opacity', 0).animate({
+				'opacity': 1
+			}, 200);
 			this.$el.find('.img_warp').html(img);
 		}
 	});
@@ -384,6 +427,7 @@
 		this.boxwh = {};
 		this.imghome = this.figure.$_photoshow.find('div[node-type="img-home"]');
 		this.map = this.figure.$_photoshow.find('div[node-type="pf-map"]')
+		this.zoom=false;
 		this.init();
 	};
 
@@ -430,20 +474,20 @@
 			}
 			getJs('../src/js/rotate.js', 'rotate', function(Rotate) {
 				__.rotate = Rotate({
-						imgObj: img,
-						width: wh[0],
-						height: wh[1],
-						imgwarp: __.imghome,
-						wwid: __.boxwh.width,
-						whei: __.boxwh.height
-					});
+					imgObj: img,
+					width: wh[0],
+					height: wh[1],
+					imgwarp: __.imghome,
+					wwid: __.boxwh.width,
+					whei: __.boxwh.height
+				});
 
 			});
 
 		},
-		zoomIn:function(){
-			var __=this;
-			var bwh=this.boxwh;
+		zoomIn: function() {
+			var __ = this;
+			var bwh = this.boxwh;
 			var imgUrl = this.imgdata['bigImg'];
 			getJs('../src/js/resetImgSize.js', 'resetImgSize', function(resize) {
 				resize({
@@ -451,100 +495,214 @@
 					style: 'min',
 					width: __.boxwh.width,
 					height: __.boxwh.height,
-					zoom:false
+					zoom: false
 				}, function(wh, url) {
-					__._setBigImg(wh,url);
+					__._setBigImg(wh, url);
 				});
 			})
+			__.zoom =true;
 
 		},
-		zoomOut:function(){
-
-		},
-		_setBigImg:function(wh,url){
+		zoomOut: function() {
 			var __=this;
-			if(wh[0]>this.boxwh.width || wh[1]>this.boxwh.height){
-				getJs('../src/js/resetImgSize.js','resetImgSize',function(resize){
+			__.zoom =false;
+			__.renderImg();
+			__.map.hide();
+		},
+		$_bigImg:'',
+		_setBigImg: function(wh, url) {
+			var __ = this;
+			if (wh[0] > this.boxwh.width || wh[1] > this.boxwh.height) {
+				getJs('../src/js/resetImgSize.js', 'resetImgSize', function(resize) {
 					resize({
 						imageUrl: url,
 						style: 'max',
 						width: $win.width(),
 						height: $win.height()
 					}, function(wh, url) {
-						__._insetBigImg(wh,url)
+						__._insetBigImg(wh, url)
 					});
 				});
-			}else{
-				__._insetBigImg(wh,url)
+			} else {
+				__._insetBigImg(wh, url)
 			}
-			
-			//this.setImgPos(wh, img);
 		},
-		$_bigImgWh:'',
-		_insetBigImg:function(wh,url){
+		$_bigImgWh: '',
+		_insetBigImg: function(wh, url) {
 			var img = $('<img src="' + url + '"  width="' + wh[0] + '" height="' + wh[1] + '" class="bigPhotoImg" />');
 			this.imghome.html(img);
-			this.$_bigImgWh=wh;
-			if(wh[0]<=this.boxwh.width && wh[1] <=this.boxwh.height){
-				img.css('margin-top', (this.boxwh.height - wh[1]) / 2);
-			}else{
-				this._insertMapImg(wh,img,url);
-			}
+			this.$_bigImgWh = wh;
+			this.$_bigImg = img;
+			this._insertMapImg(wh, img, url);
 		},
-		$_mw:'',
-		$_mh:'',
+		$_mw: '',
+		$_mh: '',
 		// get map img size
-		_getMapImgSize:function(wh,url,callback){
-			var __=this;
+		_getMapImgSize: function(wh, url, callback) {
+			var __ = this;
 			__.map.show();
-			__.$_mw=__.map.width();
-			__.$_mh=__.map.height();
-			getJs('../src/js/resetImgSize.js','resetImgSize',function(resize){
-					resize({
-						imageUrl: url,
-						style: 'max',
-						width: __.$_mw,
-						height: __.$_mh
-					}, function(wh, url) {
-						callback && callback(wh,url);
-					});
+			__.$_mw = __.map.width();
+			__.$_mh = __.map.height();
+			getJs('../src/js/resetImgSize.js', 'resetImgSize', function(resize) {
+				resize({
+					imageUrl: url,
+					style: 'max',
+					width: __.$_mw,
+					height: __.$_mh
+				}, function(wh, url) {
+					callback && callback(wh, url);
 				});
-		},
-		_insertMapImg:function(wh,img,url){
-			var __=this;
-			__._setBigImgPosition(wh,img);
-			__._getMapImgSize(wh,url,function(mapwh,url){
-				var mapimg=$('<img src="' + url + '"  width="' + mapwh[0] + '" height="' + mapwh[1] + '" class="mapImg" />');
-					var l = (__.$_mw - mapwh[0])/2;
-					var t = (__.$_mh - mapwh[1])/2;
-					mapimg.css({'top':t,'left':l});
-					__.map.html(mapimg);
-
-					//set zoomview box
-					__._getViewArea(wh,mapwh);
-					__._initViewareaPos();
 			});
 		},
-		_setBigImgPosition:function(wh,img){
-			var __=this;
-			var l = (__.boxwh.width - wh[0])/2;
-			var t = (__.boxwh.height - wh[1])/2;
-			img.css({'top':t,'left':l});
+		_mapinfo: {},
+		// 设置预览图的大小及位置
+		_insertMapImg: function(wh, img, url) {
+			var __ = this;
+			__._setBigImgPosition(wh, img);
+			if(wh[0] <= __.boxwh.width && wh[1] <= __.boxwh.height)return;
+			__._getMapImgSize(wh, url, function(mapwh, url) {
+				var mapimg = $('<img src="' + url + '"  width="' + mapwh[0] + '" height="' + mapwh[1] + '" class="mapImg" />');
+				var l = (__.$_mw - mapwh[0]) / 2;
+				var t = (__.$_mh - mapwh[1]) / 2;
+				mapimg.css({
+					'top': t,
+					'left': l
+				});
+				__.map.html(mapimg);
+				__._mapinfo.imgwid = mapwh[0];
+				__._mapinfo.imghei = mapwh[1];
+				__._mapinfo.imgleft = l;
+				__._mapinfo.imgtop = t;
+				//set zoomview box
+				__._getViewArea(wh, mapwh);
+				__._initViewareaPos(l, t);
+				__._moveViewEvn()
+			});
 		},
-		$_viewBtn:'',
-		_getViewArea:function(wh,mapwh){
-			var ratio =mapwh[0]/wh[0];
-			var viewWH=[];
-			viewWH[0]=this.boxwh.width*ratio;
-			viewWH[1]=this.boxwh.height*ratio;
+		//设置大图的居中初始位置
+		_setBigImgPosition: function(wh, img) {
+			var __ = this;
+			var l = (__.boxwh.width - wh[0]) / 2;
+			var t = (__.boxwh.height - wh[1]) / 2;
+			img.css({
+				'top': t,
+				'left': l
+			});
+		},
+		$_viewBtn: '',
+		_getViewArea: function(wh, mapwh) {
+			var __ = this;
+			var ratio = mapwh[0] / wh[0];
+			var viewWH = [];
+			viewWH[0] = this.boxwh.width * ratio;
+			viewWH[1] = this.boxwh.height * ratio;
 			var viewarea = $('<p class="viewarea"></p>');
-			viewarea.width(viewWH[0]-6);
-			viewarea.height(viewWH[1]-6)
+			viewarea.width(viewWH[0] - 6);
+			viewarea.height(viewWH[1] - 6)
+			__._mapinfo.areawid = viewWH[0];
+			__._mapinfo.areahei = viewWH[1];
 			this.map.append(viewarea);
 			this.$_viewBtn = viewarea;
 		},
-		_initViewareaPos:function(){
+		//设置预览可视框初始位置
+		_initViewareaPos: function() {
+			var mi = this._mapinfo;
+			var l = (mi.areawid - mi.imgwid) / 2;
+			var t = (mi.areahei - mi.imghei) / 2;
+			var vl = mi.imgleft - l;
+			var vt = mi.imgtop - t;
+			mi.areatop = vt;
+			mi.arealeft = vl;
+			this.$_viewBtn.css({
+				left: vl,
+				top: vt
+			});
+		},
+		//drag viewarea button
+		_moveViewEvn: function() {
+			var __ = this;
+			getJs('../src/js/mousedrag.js', 'Mousedrag', function(Mousedrag) {
+				var mousedrag = new Mousedrag(__.$_viewBtn, function(nl, ny, odata) {
+					__.emit('moving', nl, ny, odata)
+				});
+				mousedrag.mousedown(function() {
+					__.emit('moveStart');
+				});
+				mousedrag.mouseup(function() {
+					__.emit('moveEnd');
+				})
 
+			});
+			__._moveAreaPos();
+			__._moveMainImgPos();
+		},
+		//设置小图框的位置
+		_moveAreaPos: function(nl, ny, odata) {
+			var __ = this,
+				mi = __._mapinfo;
+			var newlr = [0, 0];
+			var rule = __._getRule();
+
+			this.on('moveStart', function() {
+
+			});
+			this.on('moving', function(nl, ny, odata) {
+				var left = mi.arealeft + nl;
+				var top = mi.areatop + ny;
+				if (left > rule['x'][0]) {
+					left = rule['x'][0]
+				}
+				if (left < rule['x'][1]) {
+					left = rule['x'][1]
+				}
+				if (top < rule['y'][0]) {
+					top = rule['y'][0]
+				}
+				if (top > rule['y'][1]) {
+					top = rule['y'][1]
+				}
+				// if(left > rule['x'][0] || left < rule['x'][1] )return;
+				// if(top < rule['y'][0] || top > rule['y'][1])return;
+				newlr[0] = left;
+				newlr[1] = top;
+				__.$_viewBtn.css({
+					left: left,
+					top: top
+				});
+				__.emit('setposition',mi.imgleft-left,mi.imgtop-top)
+
+			});
+			this.on('moveEnd', function() {
+				mi.arealeft = newlr[0];
+				mi.areatop = newlr[1];
+			})
+
+		},
+		//设置大图的位置
+		_moveMainImgPos: function() {
+			var __=this;
+			var rotate = this.$_bigImgWh[0] / this._mapinfo.imgwid;
+			this.on('setposition',function(zleft,ztop){
+				__.$_bigImg.css({left:zleft*rotate,top:ztop*rotate});
+
+			})
+		},
+		_getRule: function() {
+			var __ = this,
+				mi = __._mapinfo;
+			var rule = {
+				x: [],
+				y: []
+			};
+				var x1=mi.imgleft;
+				var x2 = mi.imgleft - mi.areawid + mi.imgwid;
+				var y1=mi.imgtop;
+				var y2=mi.imgtop - mi.areahei + mi.imghei;
+				rule['x'][0] = Math.max(x1,x2);
+				rule['x'][1] = Math.min(x1,x2);
+				rule['y'][0] = Math.min(y1,y2);
+				rule['y'][1] = Math.max(y1,y2);
+			return rule;
 		}
 	})
 
@@ -559,8 +717,8 @@
 		}
 	}
 
-	return function(imgDataList,index) {
-		return figureObj = new Figure(imgDataList,index);
+	return function(imgDataList, index) {
+		return figureObj = new Figure(imgDataList, index);
 	}
 
 });
