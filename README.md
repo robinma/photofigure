@@ -70,4 +70,4 @@ it can to do define method
      	//todo sth
      })  
 
-![Demo Image](http://htmlpreview.github.io/?https://github.com/robinma/photofigure/blob/master/src/images/demo.jpg)
+![Demo Image](https://raw.githubusercontent.com/robinma/photofigure/master/src/images/demo.jpg)
