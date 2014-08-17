@@ -1,5 +1,7 @@
 /**
- *
+ * author robin ma
+ * photo show figure
+ * email:ahmzj@163.com
  */
 
 (function(root, $, factory) {
@@ -43,7 +45,7 @@
 			}
 		}
 		//figure class
-	var Figure = function(imgdata, currIndex) {
+	var Figure = function(imgdata, currIndex, params) {
 		this.imgData = [];
 		this.currIndex = currIndex | 0;
 		this.init(imgdata);
@@ -88,6 +90,8 @@
 			this._warpControl();
 			//show photo main warp
 			this._renderPhotoShow();
+			this._setBoxSize();
+
 			this._renderGallary();
 		},
 		_setHidden: function() {
@@ -160,35 +164,58 @@
 			}).on('click', 'a.btn_right', function() {
 				__.imgListObj.next();
 			}).on('click', 'a[node-type="rotate"]', function() {
-				if(!__._mainImg)return;
-				if(__._mainImg.zoom){
+				if (!__._mainImg) return;
+				if (__._mainImg.zoom) {
 					__._mainImg.zoomOut();
 					__._setzoomstatus()
 				}
-				 __._mainImg.rotate.clockwise();
+				__._mainImg.rotate.clockwise();
 			}).on('click', 'a[node-type="zoom"]', function() {
-				if(!__._mainImg)return;
+				if (!__._mainImg) return;
 				var _this = $(this);
-				if(__._mainImg.zoom){
+				if (__._mainImg.zoom) {
 					__._mainImg.zoomOut();
-				}else{
+				} else {
 					__._mainImg.zoomIn();
 				}
 				__._setzoomstatus()
-				
+
 			});
+
+			this.$_photoshow.on('mouseover click', function() {
+				if (__._imglist.length < 2) return;
+				__.$_photoshow.find('a.btn').show();
+			}).on('mouseout', function() {
+				if (__._imglist.length < 2) return;
+				__.$_photoshow.find('a.btn').hide();
+			})
 		},
 		_showMainImage: function(data) {
 			this._mainImg = new mainImages(data, this);
 			this._setzoomstatus();
 		},
-		_setzoomstatus:function(){
+		_setzoomstatus: function() {
 			var zoombtn = this.$_photoshow.find('a[node-type="zoom"]');
-			if(this._mainImg.zoom){
+			if (this._mainImg.zoom) {
 				zoombtn.html('<em class="pficon zoomout"></em>');
-			}else{
+			} else {
 				zoombtn.html('<em class="pficon zoomin"></em>');
 			}
+		},
+		_setBoxSize: function() {
+			var dw = 920,
+				dh = 835,
+				minWid = 460,
+				minHei = 420;
+			var rotate = dw / dh;
+			var newWid = winAttr['winHeight'] * rotate - 36;
+			var newHei = winAttr['winHeight'] - 20;
+			if (newWid < minWid) newWid = minWid - 36;
+			if (newHei < minHei) newHei = minHeix;
+
+			var mainwarp = this.$_warp.find('.photo_figure_main');
+			mainwarp.width(newWid);
+			this.$_photoshow.height(newHei - 155);
 		}
 	});
 	//image list bow
@@ -239,8 +266,15 @@
 				__._imglist.push(minimg);
 				minimg.on('click', function(minimg) {
 					__.imgListObj.setCurrent(minimg.data.cindex)
-
 				});
+				//show gallary bar
+				if (__._imglist.length > 1) {
+					__.$_gallary.show();
+				}
+				//set gallary bar witdh and set center
+				__._setGallaryWidth();
+				//set gallary arrow is show or hide
+				__._setGallaryArrow()
 
 			}).on('pre', function(index) {
 				__._gallary_setFocus(index)
@@ -254,7 +288,7 @@
 				__.imgListObj.pre();
 			}).on('click', 'a[node-type="btn-r"]', function() {
 				__.imgListObj.next()
-			})
+			});
 			this.imgListObj.add(this.imgData);
 			__.imgListObj.setCurrent(__.currIndex || 0)
 		},
@@ -274,7 +308,7 @@
 			this.emit('switch', index, imgobjs, this);
 		},
 		_slideImgView: function(inx) {
-			var viewWid = 131;
+			var viewWid = 141;
 			var pagesize = Math.floor(this.$_viewwarp.width() / viewWid);
 			var len = this._imglist.length;
 			if (len < pagesize) return;
@@ -286,11 +320,31 @@
 				s = s - e + len;
 			}
 			this.$ul.animate({
-				'margin-left': -(s * (viewWid + 10))
+				'margin-left': -(s * viewWid)
 			}, 200);
 
+		},
+		_setGallaryWidth: function() {
+			//$_viewwarp
+			var viewWid = 141;
+			var twidth = this.$_photoshow.width();
+			var showsize = Math.floor(twidth / viewWid);
+			var showWid = showsize * viewWid;
+			var marginLR = (twidth - showWid) / 2;
+			this.$_gallary.width(showWid);
+			this.$_gallary.css({
+				'margin-left': marginLR,
+				'margin-right': marginLR
+			})
+		},
+		_setGallaryArrow:function(){
+			var imgtotal = this._imglist;
+			if(imgtotal.length<2){
+				this.$_gallary.find('a.btn').hide();
+			}else{
+				this.$_gallary.find('a.btn').show();
+			}
 		}
-
 
 	});
 	//data list
@@ -427,7 +481,7 @@
 		this.boxwh = {};
 		this.imghome = this.figure.$_photoshow.find('div[node-type="img-home"]');
 		this.map = this.figure.$_photoshow.find('div[node-type="pf-map"]')
-		this.zoom=false;
+		this.zoom = false;
 		this.init();
 	};
 
@@ -500,16 +554,16 @@
 					__._setBigImg(wh, url);
 				});
 			})
-			__.zoom =true;
+			__.zoom = true;
 
 		},
 		zoomOut: function() {
-			var __=this;
-			__.zoom =false;
+			var __ = this;
+			__.zoom = false;
 			__.renderImg();
 			__.map.hide();
 		},
-		$_bigImg:'',
+		$_bigImg: '',
 		_setBigImg: function(wh, url) {
 			var __ = this;
 			if (wh[0] > this.boxwh.width || wh[1] > this.boxwh.height) {
@@ -559,7 +613,7 @@
 		_insertMapImg: function(wh, img, url) {
 			var __ = this;
 			__._setBigImgPosition(wh, img);
-			if(wh[0] <= __.boxwh.width && wh[1] <= __.boxwh.height)return;
+			if (wh[0] <= __.boxwh.width && wh[1] <= __.boxwh.height) return;
 			__._getMapImgSize(wh, url, function(mapwh, url) {
 				var mapimg = $('<img src="' + url + '"  width="' + mapwh[0] + '" height="' + mapwh[1] + '" class="mapImg" />');
 				var l = (__.$_mw - mapwh[0]) / 2;
@@ -669,7 +723,7 @@
 					left: left,
 					top: top
 				});
-				__.emit('setposition',mi.imgleft-left,mi.imgtop-top)
+				__.emit('setposition', mi.imgleft - left, mi.imgtop - top)
 
 			});
 			this.on('moveEnd', function() {
@@ -680,10 +734,13 @@
 		},
 		//设置大图的位置
 		_moveMainImgPos: function() {
-			var __=this;
+			var __ = this;
 			var rotate = this.$_bigImgWh[0] / this._mapinfo.imgwid;
-			this.on('setposition',function(zleft,ztop){
-				__.$_bigImg.css({left:zleft*rotate,top:ztop*rotate});
+			this.on('setposition', function(zleft, ztop) {
+				__.$_bigImg.css({
+					left: zleft * rotate,
+					top: ztop * rotate
+				});
 
 			})
 		},
@@ -694,14 +751,14 @@
 				x: [],
 				y: []
 			};
-				var x1=mi.imgleft;
-				var x2 = mi.imgleft - mi.areawid + mi.imgwid;
-				var y1=mi.imgtop;
-				var y2=mi.imgtop - mi.areahei + mi.imghei;
-				rule['x'][0] = Math.max(x1,x2);
-				rule['x'][1] = Math.min(x1,x2);
-				rule['y'][0] = Math.min(y1,y2);
-				rule['y'][1] = Math.max(y1,y2);
+			var x1 = mi.imgleft;
+			var x2 = mi.imgleft - mi.areawid + mi.imgwid;
+			var y1 = mi.imgtop;
+			var y2 = mi.imgtop - mi.areahei + mi.imghei;
+			rule['x'][0] = Math.max(x1, x2);
+			rule['x'][1] = Math.min(x1, x2);
+			rule['y'][0] = Math.min(y1, y2);
+			rule['y'][1] = Math.max(y1, y2);
 			return rule;
 		}
 	})
@@ -717,8 +774,8 @@
 		}
 	}
 
-	return function(imgDataList, index) {
-		return figureObj = new Figure(imgDataList, index);
+	return function(imgDataList, index, params) {
+		return figureObj = new Figure(imgDataList, index, params);
 	}
 
 });

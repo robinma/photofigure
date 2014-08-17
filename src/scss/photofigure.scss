@@ -49,7 +49,7 @@ ul,ol{
 }
 .photo_figure_box{background:#fff;box-shadow:0 0 pte(5,16) rgba(0,0,0,.4);padding:pte(20,16) pte(40,16);}
 .photo_figure_showwarp{position:relative;width:100%;height:680px; 
-  .btn{display: block;width: 41px;height: 67px;@include bgcolor-alpha(rgba(255,255,255,.8));position: absolute;top: 50%;margin-top: -33px;
+  .btn{display: block;width: 41px;height: 67px;@include bgcolor-alpha(rgba(255,255,255,.8));position: absolute;top: 50%;margin-top: -33px;display: none;
     em{display: block;width: 28px;height: 41px;margin:13px 0 0 6px; }
     .arr_l{background-position:-57px 0;}
     .arr_r{background-position:-102px 0;}
@@ -74,7 +74,7 @@ ul,ol{
 .photo_figure_iwarp{height: 100%;position: relative; overflow: hidden;border: 1px solid #ededed;background: #f7f7f7;text-align: center;
   .bigPhotoImg{position: absolute;}
 }
-.photo_gallary{height: 111px;width: 100%;margin-top: 4px;position: relative;
+.photo_gallary{height: 111px;margin-top: 4px;position: relative;display: none;
   .pf_iw{height: 100%;overflow: hidden;}
   .galllist{height: 100%;width: 300%;}
   .item{float: left;padding-top: 6px;margin-right: 10px;}
