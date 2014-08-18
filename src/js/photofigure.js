@@ -208,11 +208,12 @@
 				minWid = 460,
 				minHei = 420;
 			var rotate = dw / dh;
+			this.getWinWH();
 			var newWid = winAttr['winHeight'] * rotate - 36;
 			var newHei = winAttr['winHeight'] - 20;
+			if(newWid > winAttr['winWidth']) newWid = winAttr['winWidth'];
 			if (newWid < minWid) newWid = minWid - 36;
 			if (newHei < minHei) newHei = minHeix;
-
 			var mainwarp = this.$_warp.find('.photo_figure_main');
 			mainwarp.width(newWid);
 			this.$_photoshow.height(newHei - 155);
@@ -366,7 +367,8 @@
 			}
 			for (var i = 0; i < imgarr.length; i++) {
 				var item = imgarr[i];
-				item.cindex = this.cindex;
+				if(!item) continue;
+				item['cindex'] = __.cindex;
 				__.emit('add', item)
 				__.dataList.push(item);
 				this.cindex++;
