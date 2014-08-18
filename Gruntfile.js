@@ -14,7 +14,8 @@ module.exports = function(grunt) {
                 src:['src/js/photofigure.js',
                 'src/js/preOnloadImgSize.js',
                 'src/js/resetImgSize.js',
-                'src/js/rotate.js'
+                'src/js/rotate.js',
+                'src/js/mousedrag.js'
                 ],
                 dest:'build/photofigure.js'
             }

@@ -91,6 +91,6 @@
         }
     });
 
-    win.Mousedrag = Mousedrag;
+    win['Mousedrag'] = Mousedrag;
     // return mousedrag;
 })(window, $);
