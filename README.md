@@ -1,4 +1,4 @@
-photofigure（**[demo view](http://htmlpreview.github.io/?https://github.com/robinma/photofigure/blob/master/demo/demo_test.html)**）
+photofigure（**[demo view](http://htmlpreview.github.io/?https://github.com/robinma/photofigure/blob/master/demo/demo_test_min.html)**）
 ===========
 
 ## 一 简介 ##
