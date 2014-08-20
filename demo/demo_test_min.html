@@ -21,6 +21,9 @@
 		
 	];
 	var photoshow = photofigure(imgdata,2);
+	photoshow.on('switch',function(){
+		console.log('change ',arguments)
+	})
 	$('#button_id').click(function(){
 		var photoshow = photofigure(imgdata);
 	})

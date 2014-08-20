@@ -56,7 +56,8 @@
 			var data = this.filterData(imgdata);
 			this.imgData = this.imgData.concat(data);
 			this.getWinWH();
-			this._renderWarp();
+			var __=this;
+			setTimeout(function(){__._renderWarp();},0);
 		},
 		filterData: function(imgdata) {
 			var imgData = [];
